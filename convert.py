@@ -42,7 +42,7 @@ print(f"tempo total de execução: {end_time - start_time:.2f} segundos")
 result_df = df[['latitude', 'longitude']]
 
 
-output_file_path = 'novo_arquivo.xlsx' 
+output_file_path = 'address-converted.xlsx' 
 result_df.to_excel(output_file_path, index=False)
 
 print("tabela de latitude e longitude criada com sucesso!")

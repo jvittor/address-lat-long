@@ -3,7 +3,6 @@ from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import time
 
-# Função para geocodificação
 def geocode_address(address, geolocator, index):
     try:
         location = geolocator.geocode(address)

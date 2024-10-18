@@ -1,24 +1,33 @@
 import pandas as pd
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
+from geopy.exc import GeocoderTimedOut
 import time
 
-def geocode_address(address, geolocator, index):
-    try:
-        location = geolocator.geocode(address)
-        print(f"{index}: Geocodificado '{address}'")
-        return location.latitude, location.longitude
-    except Exception as e:
-        print(f"{index}: Falha ao geocodificar '{address}' - {e}")
-        return None, None
-
+def geocode_address(address, geolocator, index, retries=3):
+    for attempt in range(retries):
+        try:
+            location = geolocator.geocode(address)
+            if location:
+                print(f"{index}: Geocodificado '{address}'")
+                return location.latitude, location.longitude
+            else:
+                print(f"{index}: Endereço não encontrado '{address}'")
+                return None, None
+        except GeocoderTimedOut:
+            print(f"{index}: Timeout ao tentar geocodificar '{address}', tentativa {attempt + 1}/{retries}")
+            time.sleep(2)  # Espera 2 segundos antes de tentar novamente
+        except Exception as e:
+            print(f"{index}: Falha ao geocodificar '{address}' - {e}")
+            return None, None
+    return None, None
 file_path = 'address.xlsx' 
 df = pd.read_excel(file_path)
 
 geolocator = Nominatim(user_agent="geoapiExercises")
 
 # taxa de limite
-geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+geocode = RateLimiter(geolocator.geocode, min_delay_seconds=5)
 
 latitudes = []
 longitudes = []

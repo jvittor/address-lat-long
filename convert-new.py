@@ -8,7 +8,7 @@ def geocode_address(address, geocoder, index):
         if response['features']:
             location = response['features'][0]['geometry']['coordinates']
             print(f"{index}: Geocodificado '{address}'")
-            return location[1], location[0]  # Latitude, Longitude
+            return location[1], location[0] 
         else:
             print(f"{index}: Não foi possível geocodificar '{address}'")
             return None, None
@@ -16,8 +16,8 @@ def geocode_address(address, geocoder, index):
         print(f"{index}: Falha ao geocodificar '{address}' - {e}")
         return None, None
 
-# Adicione sua chave de API do Mapbox aqui
-mapbox_token = 'sk.eyJ1Ijoic2luZWNhIiwiYSI6ImNtMmY0aGp1ZzA1Y3gybW9tbDd0NnptNDcifQ.ZlzSXSqG7VJsEp7OJhAq_Q'
+
+mapbox_token = 'api_token'
 geocoder = Geocoder(access_token=mapbox_token)
 
 file_path = 'address-cruz.xlsx' 

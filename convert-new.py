@@ -1,24 +1,25 @@
 import pandas as pd
-from mapbox import Geocoder
+import requests
 import time
 
-def geocode_address(address, geocoder, index):
+def geocode_address(address, api_key, index):
     try:
-        response = geocoder.forward(address).json()
-        if response['features']:
-            location = response['features'][0]['geometry']['coordinates']
+        url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
+        response = requests.get(url).json()
+        
+        if response['status'] == 'OK' and response['results']:
+            location = response['results'][0]['geometry']['location']
             print(f"{index}: Geocodificado '{address}'")
-            return location[1], location[0]  # Latitude, Longitude
+            return location['lat'], location['lng'] 
         else:
-            print(f"{index}: Não foi possível geocodificar '{address}'")
+            print(f"{index}: Não foi possível geocodificar '{address}' - Status: {response['status']}")
             return None, None
     except Exception as e:
         print(f"{index}: Falha ao geocodificar '{address}' - {e}")
         return None, None
 
-# Adicione sua chave de API do Mapbox aqui
-mapbox_token = 'sk.eyJ1Ijoic2luZWNhIiwiYSI6ImNtMmY0aGp1ZzA1Y3gybW9tbDd0NnptNDcifQ.ZlzSXSqG7VJsEp7OJhAq_Q'
-geocoder = Geocoder(access_token=mapbox_token)
+
+google_api_key = 'api_key'
 
 file_path = 'address-cruz.xlsx' 
 df = pd.read_excel(file_path)
@@ -29,21 +30,20 @@ longitudes = []
 start_time = time.time()
 
 for i, row in df.iterrows():
-    lat, lon = geocode_address(f"{row['endereco']}, {row['municipio']}", geocoder, i)
+    address = f"{row['endereco']}, {row['municipio']}"
+    lat, lon = geocode_address(address, google_api_key, i)
     latitudes.append(lat)
     longitudes.append(lon)
     if i % 10 == 0: 
-        print(f"processados {i+1}/{len(df)} endereços")
+        print(f"Processados {i+1}/{len(df)} endereços")
 
 df['latitude'] = latitudes
 df['longitude'] = longitudes
 
 end_time = time.time()
-print(f"tempo total de execução: {end_time - start_time:.2f} segundos")
+print(f"Tempo total de execução: {end_time - start_time:.2f} segundos")
 
-result_df = df[['latitude', 'longitude']]
+output_file_path = 'address-cruz-converted-google.xlsx' 
+df.to_excel(output_file_path, index=False)
 
-output_file_path = 'address-cruz-converted.xlsx' 
-result_df.to_excel(output_file_path, index=False)
-
-print("tabela de latitude e longitude criada com sucesso!")
+print("Tabela de latitude e longitude criada com sucesso!")
